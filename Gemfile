@@ -26,6 +26,11 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # for http requests
 gem "httparty"
 
+# for scraping
+gem "selenium-webdriver"
+gem "headless"
+gem "nokogiri"
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -38,6 +43,13 @@ gem "httparty"
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
+  gem "pry-byebug", require: false
+  gem "pry-clipboard"
+  gem "pry-rescue"
+  gem "pry-stack_explorer"
+  gem "pry-state"
+  gem "stackprof"
+  gem "pry-rails"
 end
 
 group :development do
