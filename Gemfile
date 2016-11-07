@@ -31,6 +31,9 @@ gem "selenium-webdriver"
 gem "headless"
 gem "nokogiri"
 
+# for users and auth
+gem 'devise'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

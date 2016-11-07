@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  ticker: MyText
+  quantity: 1
+  order_type: MyText
+  status: MyText
+  user_id: 
+
+two:
+  ticker: MyText
+  quantity: 1
+  order_type: MyText
+  status: MyText
+  user_id: 
