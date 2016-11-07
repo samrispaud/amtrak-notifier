@@ -24,10 +24,14 @@ class OrdersController < ApplicationController
   # POST /orders
   # POST /orders.json
   def create
+    binding.pry
     @order = Order.new(order_params)
+    binding.pry
 
     respond_to do |format|
       if @order.save
+        stockfuse = Scraper::Stockfuse.new(current_user)
+        stockfuse.execute_order(@order)
         format.html { redirect_to @order, notice: 'Order was successfully created.' }
         format.json { render :show, status: :created, location: @order }
       else
@@ -69,6 +73,6 @@ class OrdersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def order_params
-      params.require(:order).permit(:ticker, :quantity, :order_type, :status, :user_id)
+      params.require(:order).permit(:ticker, :quantity, :order_type, :status, :user_id, :game_id)
     end
 end

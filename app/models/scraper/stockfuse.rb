@@ -23,29 +23,54 @@ module Scraper
 
     def execute_order(order)
       begin
+        # open order modal
         @driver.execute_script("$('.btn-fuse-new-trade').first().click()")
         sleep(3)
         @driver.execute_script("$('.btn-fuse-new-trade').first().click()")
-        @driver.find_element(:id, "order-sell").click
+
+        # select order type
+        if (order.order_type == "BUY")
+          @driver.find_element(:id, "order-buy").click
+        elsif (order.order_type == "SELL")
+          @driver.find_element(:id, "order-sell").click
+        else
+          raise Exception.new("Order type invalid")
+        end
+
+        # fill in ticker
         ticker = @driver.find_element(:xpath, "//form[@id='order-form']/div[4]/div/div/div[1]/input")
         ticker.click
         ticker.clear
-        ticker.send_keys "CMG"
+        ticker.send_keys order.ticker
         sleep(1)
+        # select first option in typeahead for ticker
         ticker.send_keys:return
-        @driver.find_element(:name, "order-quantity").click
-        @driver.find_element(:name, "order-quantity").clear
-        @driver.find_element(:name, "order-quantity").send_keys "66"
-        if not @driver.find_element(:xpath, "//form[@id='order-form']/div[7]/div[1]/select//option[1]").selected?
-            @driver.find_element(:xpath, "//form[@id='order-form']/div[7]/div[1]/select//option[1]").click
-        end
+
+        # set order quantity
+        quantity = @driver.find_element(:name, "order-quantity")
+        quantity.click
+        quantity.clear
+        quantity.send_keys order.quantity
+
+        # fill in a comment because this is required
         @driver.find_element(:name, "order-comment").click
         @driver.find_element(:name, "order-comment").clear
-        @driver.find_element(:name, "order-comment").send_keys "Trade by samrispaud"
+        @driver.find_element(:name, "order-comment").send_keys "Here's my trade"
         binding.pry
+
+        # submit order
         # @driver.save_screenshot 'before_trade.png'
         @driver.find_element(:xpath, "//div[@class='modal-footer']/button").click
+        # wait for trade to send
         sleep(10)
+        logout_of_stockfuse
+      rescue => e
+        @errors << e
+      end
+    end
+
+    def logout_of_stockfuse
+      begin
         # @driver.save_screenshot 'after_trade.png'
         @driver.find_element(:css, "span.underline").click
         @driver.find_element(:xpath, "//div[@class='main-sidebar-user']//a[.='Sign Out']").click

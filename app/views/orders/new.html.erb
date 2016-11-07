@@ -1,5 +1,21 @@
 <h1>New Order</h1>
 
-<%= render 'form' %>
+<%= form_for @order, url: {action: "create"} do |f| %>
+  <%= label_tag(:ticker, "Ticker:") %>
+  <%= f.text_field :ticker %>
+  <br />
+  <%= label_tag(:quantity, "Quantity:") %>
+  <%= f.text_field :quantity %>
+  <br />
+  <%= label_tag(:order_type, "Trade type:") %>
+  <%= f.text_field :order_type %>
+  <br />
+  <%= label_tag(:user_id, "User Id:") %>
+  <%= f.text_field :user_id %>
+  <br />
+  <%= label_tag(:game_id, "Game Id:") %>
+  <%= f.text_field :game_id %>
+  <%= f.submit "Create" %>
+<% end %>
 
 <%= link_to 'Back', orders_path %>
