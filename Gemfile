@@ -30,6 +30,9 @@ gem "httparty"
 gem "selenium-webdriver"
 gem "headless"
 gem "nokogiri"
+gem 'poltergeist'
+gem 'capybara'
+gem 'launchy'
 
 # for users and auth
 gem 'devise'
@@ -62,3 +65,10 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 end
+
+group :production do
+  # For Heroku
+  gem 'rails_12factor'
+end
+
+ruby "2.3.1"

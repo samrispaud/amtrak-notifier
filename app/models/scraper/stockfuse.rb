@@ -1,6 +1,7 @@
-require 'nokogiri'
-require 'headless'
+# require 'nokogiri'
+# require 'headless'
 require 'selenium-webdriver'
+require 'capybara/poltergeist'
 
 module Scraper
   class Stockfuse
@@ -8,14 +9,22 @@ module Scraper
 
     def initialize(user)
       begin
-        headless = Headless.new(dimensions: "1920x1080x24")
-        headless.start
         @errors = []
-        @driver = Selenium::WebDriver.for :chrome
-        @driver.navigate.to 'https://stockfuse.com/accounts/signin/?next=/'
-        @driver.find_element(:id, "id_identification").send_keys user.email
-        @driver.find_element(:id, "id_password").send_keys user.stockfuse_password
-        @driver.find_element(:id, "id_submit").click
+
+        # Register driver
+        Capybara.register_driver :poltergeist do |app|
+          Capybara::Poltergeist::Driver.new(app, js_errors: false)
+        end
+
+        # Configure Capybara to use Poltergeist as the driver
+        Capybara.default_driver = :poltergeist
+
+        @driver = Capybara.current_session
+        @driver.visit 'https://stockfuse.com/accounts/signin/?next=/'
+        @driver.fill_in 'id_identification', with: user.email
+        @driver.fill_in 'id_password', with: user.stockfuse_password
+        @driver.click_on 'id_submit'
+        sleep(5)
       rescue => e
         @errors << e
       end
@@ -28,7 +37,6 @@ module Scraper
         sleep(2)
         @driver.execute_script("$('.btn-fuse-new-trade').first().click()")
         sleep(2)
-
         # select game
         game_name = order.game.name
         @driver.execute_script("var textToFind = '#{game_name}'; var dd = document.getElementsByName('order-match-id')[0]; for (var i = 0; i < dd.options.length; i++) { if (dd.options[i].text === textToFind) { dd.selectedIndex = i; break; } }")
@@ -36,37 +44,29 @@ module Scraper
 
         # select order type
         if (order.order_type == "BUY")
-          @driver.find_element(:id, "order-buy").click
+          @driver.execute_script("$('#order-buy').click()")
         elsif (order.order_type == "SELL")
-          @driver.find_element(:id, "order-sell").click
+          @driver.execute_script("$('#order-sell').click()")
         else
           raise Exception.new("Order type invalid")
         end
 
         # fill in ticker
-        ticker = @driver.find_element(:xpath, "//form[@id='order-form']/div[4]/div/div/div[1]/input")
-        ticker.click
-        ticker.clear
-        ticker.send_keys order.ticker
+        ticker = @driver.find(:xpath, "//form[@id='order-form']/div[4]/div/div/div[1]/input")
+        ticker.set(order.ticker)
         sleep(3)
         # select first option in typeahead for ticker
-        ticker.send_keys:return
+        ticker.native.send_keys(:return)
 
         # set order quantity
-        quantity = @driver.find_element(:name, "order-quantity")
-        quantity.click
-        quantity.clear
-        quantity.send_keys order.quantity
+        quantity = @driver.fill_in "order-quantity", with: order.quantity
 
         # fill in a comment because this is required
-        order_string = "Order for #{order.quantity} share #{order.ticker}"
-        @driver.find_element(:name, "order-comment").click
-        @driver.find_element(:name, "order-comment").clear
-        @driver.find_element(:name, "order-comment").send_keys order_string
-
+        order_string = "Order for #{order.quantity} shares of #{order.ticker}"
+        @driver.fill_in "order-comment", with: order_string
         # submit order
         # @driver.save_screenshot 'before_trade.png'
-        @driver.find_element(:xpath, "//div[@class='modal-footer']/button").click
+        @driver.find(:xpath, "//div[@class='modal-footer']/button").click
         # wait for trade to send
         sleep(5)
         logout_of_stockfuse
