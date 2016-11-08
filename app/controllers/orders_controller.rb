@@ -24,9 +24,7 @@ class OrdersController < ApplicationController
   # POST /orders
   # POST /orders.json
   def create
-    binding.pry
     @order = Order.new(order_params)
-    binding.pry
 
     respond_to do |format|
       if @order.save
