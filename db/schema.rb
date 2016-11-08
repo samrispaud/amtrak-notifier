@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20161107224623) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "games", force: :cascade do |t|
     t.text     "name"
     t.integer  "user_id"
@@ -20,7 +23,7 @@ ActiveRecord::Schema.define(version: 20161107224623) do
     t.datetime "updated_at", null: false
   end
 
-  add_index "games", ["user_id"], name: "index_games_on_user_id"
+  add_index "games", ["user_id"], name: "index_games_on_user_id", using: :btree
 
   create_table "orders", force: :cascade do |t|
     t.text     "ticker"
@@ -33,8 +36,8 @@ ActiveRecord::Schema.define(version: 20161107224623) do
     t.integer  "game_id"
   end
 
-  add_index "orders", ["game_id"], name: "index_orders_on_game_id"
-  add_index "orders", ["user_id"], name: "index_orders_on_user_id"
+  add_index "orders", ["game_id"], name: "index_orders_on_game_id", using: :btree
+  add_index "orders", ["user_id"], name: "index_orders_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
@@ -52,7 +55,9 @@ ActiveRecord::Schema.define(version: 20161107224623) do
     t.text     "stockfuse_password"
   end
 
-  add_index "users", ["email"], name: "index_users_on_email", unique: true
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
+  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
+  add_foreign_key "games", "users"
+  add_foreign_key "orders", "users"
 end
