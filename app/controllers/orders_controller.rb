@@ -15,6 +15,7 @@ class OrdersController < ApplicationController
   # GET /orders/new
   def new
     @order = Order.new
+    @games = current_user.games
   end
 
   # GET /orders/1/edit
@@ -25,11 +26,17 @@ class OrdersController < ApplicationController
   # POST /orders.json
   def create
     @order = Order.new(order_params)
+    @order.update(user: current_user)
 
     respond_to do |format|
       if @order.save
         stockfuse = Scraper::Stockfuse.new(current_user)
         stockfuse.execute_order(@order)
+        if stockfuse.errors.present?
+          @order.update(status: stockfuse.errors.last)
+        else
+          @order.update(status: "Success")
+        end
         format.html { redirect_to @order, notice: 'Order was successfully created.' }
         format.json { render :show, status: :created, location: @order }
       else
@@ -71,6 +78,6 @@ class OrdersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def order_params
-      params.require(:order).permit(:ticker, :quantity, :order_type, :status, :user_id, :game_id)
+      params.require(:order).permit(:ticker, :quantity, :order_type, :status, :game_id)
     end
 end

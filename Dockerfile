@@ -1,25 +1,31 @@
-# Use the rails image because it properly sets up Node.js and Postgres
-FROM rails:4.2.6
+FROM centos:7
 
-# PhantomJS is required for running tests
-ENV PHANTOMJS_SHA256 86dd9a4bf4aee45f1a84c9f61cf1947c1d6dce9b9e8d2a907105da7852460d2f
+ENV RUBY_VERSION 2.2.3
+ENV PHANTOMJS_VERSION 1.9.8
 
-RUN mkdir /usr/local/phantomjs \
-  && curl -o phantomjs.tar.bz2 -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
-  && echo "$PHANTOMJS_SHA256 *phantomjs.tar.bz2" | sha256sum -c - \
-  && tar -xjf phantomjs.tar.bz2 -C /usr/local/phantomjs --strip-components=1 \
-  && rm phantomjs.tar.bz2
+# find URL and SHA256 on http://phantomjs.org/download.html
+ENV PHANTOMJS_DOWNLOAD_URL https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2
+ENV PHANTOMJS_DOWNLOAD_SHA256 a1d9628118e270f26c4ddd1d7f3502a93b48ede334b8585d11c1c3ae7bc7163a
 
-RUN ln -s ../phantomjs/bin/phantomjs /usr/local/bin/
+# install general pre-requisites
+RUN yum install -y epel-release
+RUN yum install -y tar bzip2 git sqlite make gcc gcc-c++ ruby-devel zlib-devel postgresql-devel cmake openssh-client libxml2-devel libxslt-devel nodejs npm
 
-WORKDIR /stockfuse-crawler
+# installing webkit - useful for CI webapps
+RUN yum install -y qtwebkit-devel
+RUN ln -s /usr/lib64/qt4/bin/qmake /usr/bin/qmake
 
-COPY Gemfile /stockfuse-crawler
-COPY Gemfile.lock /stockfuse-crawler
+# INSTALL RUBY & rubygems
+RUN yum install -y ruby-$RUBY_VERSION rubygems
+RUN gem install bundler rspec rails:4.2.7
 
-RUN bundle install --jobs 20 --retry 5
+# INSTALL PHANTOMJS
+RUN yum install -y fontconfig freetype freetype-devel fontconfig-devel libstdc++
 
-COPY . /stockfuse-crawler
+RUN mkdir -p /opt/phantomjs/
+RUN curl -fsSL "$PHANTOMJS_DOWNLOAD_URL" -o phantomjs.tar.bz2
+RUN echo "$PHANTOMJS_DOWNLOAD_SHA256 phantomjs.tar.bz2" | sha256sum -c -
+RUN tar -xvf phantomjs.tar.bz2 -C /opt/phantomjs
+RUN rm phantomjs.tar.bz2
 
-EXPOSE 8080
-CMD ["rails", "server", "-b", "0.0.0.0", "-p", "8080"]
+ENV PATH $PATH:/opt/phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/

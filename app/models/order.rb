@@ -4,4 +4,6 @@ class Order < ActiveRecord::Base
   validates :ticker, presence: true
   validates :quantity, presence: true
   validates :order_type, presence: true
+  validates :user, presence: true
+  validates :game, presence: true
 end
