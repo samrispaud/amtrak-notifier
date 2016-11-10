@@ -1,15 +1,25 @@
-FROM ruby:2.2.3
-RUN apt-get update -qq && apt-get install -y build-essential nodejs npm nodejs-legacy postgresql-client vim
-RUN npm install -g phantomjs
+# Use the rails image because it properly sets up Node.js and Postgres
+FROM rails:4.2.6
 
-RUN mkdir /myapp
+# PhantomJS is required for running tests
+ENV PHANTOMJS_SHA256 86dd9a4bf4aee45f1a84c9f61cf1947c1d6dce9b9e8d2a907105da7852460d2f
 
-WORKDIR /tmp
-COPY Gemfile Gemfile
-COPY Gemfile.lock Gemfile.lock
-RUN bundle install
+RUN mkdir /usr/local/phantomjs \
+  && curl -o phantomjs.tar.bz2 -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && echo "$PHANTOMJS_SHA256 *phantomjs.tar.bz2" | sha256sum -c - \
+  && tar -xjf phantomjs.tar.bz2 -C /usr/local/phantomjs --strip-components=1 \
+  && rm phantomjs.tar.bz2
 
-ADD . /myapp
-WORKDIR /myapp
-RUN RAILS_ENV=production bundle exec rake assets:precompile --trace
-CMD ["rails","server","-b","0.0.0.0"]
+RUN ln -s ../phantomjs/bin/phantomjs /usr/local/bin/
+
+WORKDIR /stockfuse-crawler
+
+COPY Gemfile /stockfuse-crawler
+COPY Gemfile.lock /stockfuse-crawler
+
+RUN bundle install --jobs 20 --retry 5
+
+COPY . /stockfuse-crawler
+
+EXPOSE 8080
+CMD ["rails", "server", "-b", "0.0.0.0", "-p", "8080"]
