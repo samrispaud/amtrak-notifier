@@ -24,7 +24,7 @@ module Scraper
         @driver.fill_in 'id_identification', with: user.email
         @driver.fill_in 'id_password', with: user.stockfuse_password
         @driver.click_on 'id_submit'
-        sleep(5)
+        sleep(4)
       rescue => e
         @errors << e
       end
@@ -34,13 +34,13 @@ module Scraper
       begin
         # open order modal
         @driver.execute_script("$('.btn-fuse-new-trade').first().click()")
-        sleep(2)
+        sleep(1)
         @driver.execute_script("$('.btn-fuse-new-trade').first().click()")
-        sleep(2)
+        sleep(1)
         # select game
         game_name = order.game.name
         @driver.execute_script("var textToFind = '#{game_name}'; var dd = document.getElementsByName('order-match-id')[0]; for (var i = 0; i < dd.options.length; i++) { if (dd.options[i].text === textToFind) { dd.selectedIndex = i; break; } }")
-        sleep(2)
+        sleep(1)
 
         # select order type
         if (order.order_type == "BUY")
@@ -54,7 +54,7 @@ module Scraper
         # fill in ticker
         ticker = @driver.find(:xpath, "//form[@id='order-form']/div[4]/div/div/div[1]/input")
         ticker.set(order.ticker)
-        sleep(3)
+        sleep(1)
         # select first option in typeahead for ticker
         ticker.native.send_keys(:return)
 
@@ -68,7 +68,7 @@ module Scraper
         # @driver.save_screenshot 'before_trade.png'
         @driver.find(:xpath, "//div[@class='modal-footer']/button").click
         # wait for trade to send
-        sleep(5)
+        sleep(3)
         logout_of_stockfuse
       rescue => e
         @errors << e
