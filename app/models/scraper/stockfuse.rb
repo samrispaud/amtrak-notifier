@@ -28,7 +28,6 @@ module Scraper
         sleep(5)
       rescue => e
         @errors << e
-        @driver.quit
       end
     end
 
@@ -72,9 +71,9 @@ module Scraper
         sleep(5)
         file = File.open(@driver.save_screenshot)
         order.update(receipt: file)
+        @driver.quit
       rescue => e
         @errors << e
-        @driver.quit
       end
     end
 
