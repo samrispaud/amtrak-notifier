@@ -60,7 +60,7 @@ module Scraper
         ticker.native.send_keys(:return)
 
         # set order quantity
-        quantity = @driver.fill_in "order-quantity", with: order.quantity
+        @driver.fill_in "order-quantity", with: order.quantity
 
         # fill in a comment because this is required
         order_string = "Order for #{order.quantity} shares of #{order.ticker}"
@@ -71,7 +71,7 @@ module Scraper
         sleep(5)
         file = File.open(@driver.save_screenshot)
         order.update(receipt: file)
-        @driver.quit
+        Capybara.reset_session!
       rescue => e
         @errors << e
       end
