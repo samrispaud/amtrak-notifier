@@ -1,6 +1,6 @@
 # require 'nokogiri'
 # require 'headless'
-require 'selenium-webdriver'
+# require 'selenium-webdriver'
 require 'capybara/poltergeist'
 
 module Scraper
@@ -18,6 +18,7 @@ module Scraper
 
         # Configure Capybara to use Poltergeist as the driver
         Capybara.default_driver = :poltergeist
+        Capybara.save_path = "public/capybara_screenshots"
 
         @driver = Capybara.current_session
         @driver.visit 'https://stockfuse.com/accounts/signin/?next=/'
@@ -27,6 +28,7 @@ module Scraper
         sleep(5)
       rescue => e
         @errors << e
+        @driver.quit
       end
     end
 
@@ -65,13 +67,14 @@ module Scraper
         order_string = "Order for #{order.quantity} shares of #{order.ticker}"
         @driver.fill_in "order-comment", with: order_string
         # submit order
-        # @driver.save_screenshot 'before_trade.png'
-        @driver.find(:xpath, "//div[@class='modal-footer']/button").click
+        @driver.execute_script("submitOrder()")
         # wait for trade to send
-        sleep(3)
-        logout_of_stockfuse
+        sleep(5)
+        file = File.open(@driver.save_screenshot)
+        order.update(receipt: file)
       rescue => e
         @errors << e
+        @driver.quit
       end
     end
 
@@ -87,18 +90,5 @@ module Scraper
     #     @errors << e
     #   end
     # end
-
-    def logout_of_stockfuse
-      begin
-        # @driver.save_screenshot 'after_trade.png'
-        @driver.find_element(:css, "span.underline").click
-        @driver.find_element(:xpath, "//div[@class='main-sidebar-user']//a[.='Sign Out']").click
-        # @driver.save_screenshot 'done.png'
-        @driver.quit
-        headless.destroy
-      rescue => e
-        @errors << e
-      end
-    end
   end
 end

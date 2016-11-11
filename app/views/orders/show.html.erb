@@ -21,9 +21,10 @@
 </p>
 
 <p>
-  <strong>User:</strong>
-  <%= @order.user %>
+  <strong>Game:</strong>
+  <%= @order.game.name %>
 </p>
-
-<%= link_to 'Edit', edit_order_path(@order) %> |
 <%= link_to 'Back', orders_path %>
+<p>
+   <%= image_tag @order.receipt.url %>
+</p>

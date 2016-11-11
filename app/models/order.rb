@@ -6,4 +6,5 @@ class Order < ActiveRecord::Base
   validates :order_type, presence: true
   validates :user, presence: true
   validates :game, presence: true
+  mount_uploader :receipt, OrderReceiptUploader
 end

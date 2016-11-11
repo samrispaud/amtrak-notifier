@@ -37,6 +37,9 @@ gem 'launchy'
 # for users and auth
 gem 'devise'
 
+# for image upload and storage
+gem 'carrierwave', '>= 1.0.0.rc', '< 2.0'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

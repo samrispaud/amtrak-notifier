@@ -16,3 +16,7 @@
 !/log/.keep
 /tmp
 .env
+
+# Ignore screenshots
+/public/capybara_screenshots
+/public/uploads

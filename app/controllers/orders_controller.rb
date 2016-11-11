@@ -4,7 +4,7 @@ class OrdersController < ApplicationController
   # GET /orders
   # GET /orders.json
   def index
-    @orders = Order.all
+    @orders = Order.where(user: current_user)
   end
 
   # GET /orders/1
@@ -33,7 +33,7 @@ class OrdersController < ApplicationController
         stockfuse = Scraper::Stockfuse.new(current_user)
         stockfuse.execute_order(@order)
         if stockfuse.errors.present?
-          @order.update(status: stockfuse.errors.last)
+          @order.update(status: stockfuse.errors.join(","))
         else
           @order.update(status: "Success")
         end

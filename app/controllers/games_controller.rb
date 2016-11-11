@@ -4,7 +4,7 @@ class GamesController < ApplicationController
   # GET /games
   # GET /games.json
   def index
-    @games = Game.all
+    @games = Game.where(user: current_user)
   end
 
   # GET /games/1
@@ -25,6 +25,7 @@ class GamesController < ApplicationController
   # POST /games.json
   def create
     @game = Game.new(game_params)
+    @game.update(user: current_user)
 
     respond_to do |format|
       if @game.save
@@ -69,6 +70,6 @@ class GamesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def game_params
-      params.require(:game).permit(:name, :user_id)
+      params.require(:game).permit(:name)
     end
 end
