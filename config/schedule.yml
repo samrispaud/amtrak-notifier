@@ -1,0 +1,4 @@
+check_active_alerts:
+  cron: "* * * * *"
+  class: "CheckActiveAlerts"
+  queue: check_active_alerts

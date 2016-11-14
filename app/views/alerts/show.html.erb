@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Ticker:</strong>
+  <%= @alert.ticker %>
+</p>
+
+<p>
+  <strong>Exchange:</strong>
+  <%= @alert.exchange %>
+</p>
+
+<p>
+  <strong>Comparison logic:</strong>
+  <%= @alert.comparison_logic %>
+</p>
+
+<p>
+  <strong>Price:</strong>
+  <%= @alert.price %>
+</p>
+
+<p>
+  <strong>Order:</strong>
+  <%= @alert.order %>
+</p>
+
+<%= link_to 'Edit', edit_alert_path(@alert) %> |
+<%= link_to 'Back', alerts_path %>
