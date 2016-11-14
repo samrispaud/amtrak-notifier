@@ -5,11 +5,11 @@
 # if it doesn't go to next one
 
 class CheckActiveAlerts < ActiveJob::Base
-  queue_as :check_active_alerts
+  queue_as :default
 
   def perform
     Alert.where(status: "active").find_each do |alert|
-      CheckAlert.perform_later(alert.id)
+      CheckAlert.perform_now(alert.id)
     end
   end
 end

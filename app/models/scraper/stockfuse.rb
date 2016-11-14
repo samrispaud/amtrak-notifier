@@ -71,7 +71,6 @@ module Scraper
         sleep(5)
         file = File.open(@driver.save_screenshot)
         order.update(receipt: file)
-        Capybara.reset_session!
       rescue => e
         @errors << e
       end

@@ -11,10 +11,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161111024438) do
+ActiveRecord::Schema.define(version: 20161114021335) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "alerts", force: :cascade do |t|
+    t.string   "ticker"
+    t.string   "exchange"
+    t.string   "comparison_logic"
+    t.float    "price"
+    t.integer  "order_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+    t.integer  "user_id"
+    t.string   "status"
+  end
+
+  add_index "alerts", ["order_id"], name: "index_alerts_on_order_id", using: :btree
+  add_index "alerts", ["user_id"], name: "index_alerts_on_user_id", using: :btree
 
   create_table "games", force: :cascade do |t|
     t.text     "name"
@@ -59,6 +74,8 @@ ActiveRecord::Schema.define(version: 20161111024438) do
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
+  add_foreign_key "alerts", "orders"
+  add_foreign_key "alerts", "users"
   add_foreign_key "games", "users"
   add_foreign_key "orders", "users"
 end

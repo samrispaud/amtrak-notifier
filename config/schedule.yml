@@ -1,4 +1,5 @@
 check_active_alerts:
   cron: "* * * * *"
   class: "CheckActiveAlerts"
-  queue: check_active_alerts
+  queue: default
+  active_job: true

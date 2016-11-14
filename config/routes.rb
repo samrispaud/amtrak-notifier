@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  require 'sidekiq/web'
+  require 'sidekiq/cron/web'
+
+  authenticate :user do
+    mount Sidekiq::Web => '/sidekiq'
+  end
+
   resources :alerts
   resources :games
   resources :orders

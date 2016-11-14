@@ -16,6 +16,7 @@
 !/log/.keep
 /tmp
 .env
+dump.rdb
 
 # Ignore screenshots
 /public/capybara_screenshots

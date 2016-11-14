@@ -28,22 +28,28 @@ class OrdersController < ApplicationController
     @order = Order.new(order_params)
     @order.update(user: current_user)
 
-    respond_to do |format|
-      if @order.save
-        stockfuse = Scraper::Stockfuse.new(current_user)
-        stockfuse.execute_order(@order)
-        if stockfuse.errors.present?
-          @order.update(status: stockfuse.errors.join(","))
-        else
-          @order.update(status: "Success")
-        end
-        format.html { redirect_to @order, notice: 'Order was successfully created.' }
-        format.json { render :show, status: :created, location: @order }
-      else
-        format.html { render :new }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
-      end
+    if @order.save
+      redirect_to @order, notice: 'Order was created. Now go tie an alert to it'
+    else
+      render :new
     end
+
+    # respond_to do |format|
+    #   if @order.save
+    #     stockfuse = Scraper::Stockfuse.new(current_user)
+    #     stockfuse.execute_order(@order)
+    #     if stockfuse.errors.present?
+    #       @order.update(status: stockfuse.errors.join(","))
+    #     else
+    #       @order.update(status: "Success")
+    #     end
+    #     format.html { redirect_to @order, notice: 'Order was successfully created.' }
+    #     format.json { render :show, status: :created, location: @order }
+    #   else
+    #     format.html { render :new }
+    #     format.json { render json: @order.errors, status: :unprocessable_entity }
+    #   end
+    # end
   end
 
   # PATCH/PUT /orders/1
