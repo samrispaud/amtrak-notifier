@@ -24,6 +24,7 @@
   <strong>Game:</strong>
   <%= @order.game.name %>
 </p>
+<%= link_to 'Add an Alert | ', new_alert_path(order_id: @order.id) %>
 <%= link_to 'Back', orders_path %>
 <p>
    <%= image_tag @order.receipt.url %>

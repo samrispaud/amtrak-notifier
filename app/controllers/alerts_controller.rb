@@ -13,7 +13,8 @@ class AlertsController < ApplicationController
   # GET /alerts/new
   def new
     @alert = Alert.new
-    @orders = Order.where(user: current_user)
+    @alert.ticker = Order.find(params[:order_id]).ticker
+    @orders = Order.where(user: current_user).order("updated_at DESC")
   end
 
   # GET /alerts/1/edit

@@ -11,6 +11,7 @@ class CheckAlert < ActiveJob::Base
         stockfuse.execute_order(alert.order)
         if stockfuse.errors.present?
           alert.order.update(status: stockfuse.errors.join(","))
+          alert.update(status: "errors")
         else
           alert.order.update(status: "Success")
           alert.update(status: "Success")
@@ -22,6 +23,7 @@ class CheckAlert < ActiveJob::Base
         stockfuse.execute_order(alert.order)
         if stockfuse.errors.present?
           alert.order.update(status: stockfuse.errors.join(","))
+          alert.update(status: "errors")
         else
           alert.order.update(status: "Success")
           alert.update(status: "Success")
