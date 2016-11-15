@@ -1,35 +1,63 @@
 <p id="notice"><%= notice %></p>
 
-<h1>Listing Alerts</h1>
-
-<table>
+<h1>Active Alerts</h1>
+<table class="table table-striped">
   <thead>
     <tr>
       <th>Ticker</th>
-      <th>Exchange</th>
-      <th>Comparison logic</th>
-      <th>Price</th>
+      <th>Last Price</th>
+      <th>Criteria</th>
       <th>Order</th>
+      <th>Alert Status</th>
       <th colspan="3"></th>
     </tr>
   </thead>
 
   <tbody>
-    <% @alerts.each do |alert| %>
+    <% @alerts.where(status: "active").each do |alert| %>
       <tr>
         <td><%= alert.ticker %></td>
-        <td><%= alert.exchange %></td>
-        <td><%= alert.comparison_logic %></td>
-        <td><%= alert.price %></td>
-        <td><%= alert.order %></td>
-        <td><%= link_to 'Show', alert %></td>
-        <td><%= link_to 'Edit', edit_alert_path(alert) %></td>
-        <td><%= link_to 'Destroy', alert, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= alert.last_price %></td>
+        <td><%= "#{alert.comparison_logic} $#{alert.price}" %></td>
+        <td><%= "#{alert.order.order_type} #{alert.order.quantity} shares - #{alert.order.game.name}" %></td>
+        <td><%= alert.status %></td>
+        <td><%= link_to 'Edit Alert', edit_alert_path(alert) %></td>
+        <td><%= link_to 'Delete Alert', alert, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to 'View Order', alert.order %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
-
+<%= link_to 'New Alert', new_order_path, class: "btn btn-primary" %>
+<%= link_to 'View Orders', orders_path, class: "btn btn-success" %>
+<br>
 <br>
 
-<%= link_to 'New Alert', new_alert_path %>
+<h1>Inactive Alerts</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Ticker</th>
+      <th>Price Triggered</th>
+      <th>Criteria</th>
+      <th>Order</th>
+      <th>Alert Status</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @alerts.where.not(status: "active").each do |alert| %>
+      <tr>
+        <td><%= alert.ticker %></td>
+        <td><%= alert.last_price %></td>
+        <td><%= "#{alert.comparison_logic} $#{alert.price}" %></td>
+        <td><%= "#{alert.order.order_type} #{alert.order.quantity} shares - #{alert.order.game.name}" %></td>
+        <td><%= alert.status %></td>
+        <td><%= link_to 'Edit Alert', edit_alert_path(alert) %></td>
+        <td><%= link_to 'Delete Alert', alert, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to 'View Order', alert.order %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

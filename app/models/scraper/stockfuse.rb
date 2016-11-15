@@ -1,6 +1,3 @@
-# require 'nokogiri'
-# require 'headless'
-# require 'selenium-webdriver'
 require 'capybara/poltergeist'
 
 module Scraper

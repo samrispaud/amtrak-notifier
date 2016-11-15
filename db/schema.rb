@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161114021335) do
+ActiveRecord::Schema.define(version: 20161115034005) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 20161114021335) do
     t.datetime "updated_at",       null: false
     t.integer  "user_id"
     t.string   "status"
+    t.float    "last_price"
   end
 
   add_index "alerts", ["order_id"], name: "index_alerts_on_order_id", using: :btree
