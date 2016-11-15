@@ -44,6 +44,12 @@ gem "sidekiq-cron", "~> 0.4.0"
 # for image upload and storage
 gem 'carrierwave', '>= 1.0.0.rc', '< 2.0'
 
+# for alerts
+gem 'twilio-ruby'
+
+# for env vars
+gem 'figaro'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
