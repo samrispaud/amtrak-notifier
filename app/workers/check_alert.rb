@@ -13,9 +13,13 @@ class CheckAlert < ActiveJob::Base
         if stockfuse.errors.present?
           alert.order.update(status: stockfuse.errors.join(","))
           alert.update(status: "Error")
+          @client = Twilio::REST::Client.new
+          @client.messages.create( from: ENV["TWILIO_NUMBER"], to: alert.user.phone_number, body: "[ERROR] #{alert.order.order_type} #{alert.order.quantity} shares of #{alert.order.ticker} ($#{alert.last_price} #{alert.comparison_logic} $#{alert.price})" )
         else
           alert.order.update(status: "Success")
           alert.update(status: "Success")
+          @client = Twilio::REST::Client.new
+          @client.messages.create( from: ENV["TWILIO_NUMBER"], to: alert.user.phone_number, body: "[SUCCESS] #{alert.order.order_type} #{alert.order.quantity} shares of #{alert.order.ticker} ($#{alert.last_price} #{alert.comparison_logic} $#{alert.price})" )
         end
       end
     when "LESS THAN"
@@ -25,9 +29,13 @@ class CheckAlert < ActiveJob::Base
         if stockfuse.errors.present?
           alert.order.update(status: stockfuse.errors.join(","))
           alert.update(status: "Error")
+          @client = Twilio::REST::Client.new
+          @client.messages.create( from: ENV["TWILIO_NUMBER"], to: alert.user.phone_number, body: "[ERROR] #{alert.order.order_type} #{alert.order.quantity} shares of #{alert.order.ticker} ($#{alert.last_price} #{alert.comparison_logic} $#{alert.price})" )
         else
           alert.order.update(status: "Success")
           alert.update(status: "Success")
+          @client = Twilio::REST::Client.new
+          @client.messages.create( from: ENV["TWILIO_NUMBER"], to: alert.user.phone_number, body: "[SUCCESS] #{alert.order.order_type} #{alert.order.quantity} shares of #{alert.order.ticker} ($#{alert.last_price} #{alert.comparison_logic} $#{alert.price})" )
         end
       end
     end

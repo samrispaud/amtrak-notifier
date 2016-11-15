@@ -67,8 +67,6 @@ module Scraper
         # wait for trade to send
         sleep(5)
         file = File.open(@driver.save_screenshot)
-        @client = Twilio::REST::Client.new
-        @client.messages.create( from: order.user.phone_number, to: ENV["TWILIO_NUMBER"], body: '#{order.order_type} #{order.quantity} shares of #{order.ticker} ($#{order.alert.last_price} #{order.alert.comparison_logic} $#{order.alert.price})' )
         order.update(receipt: file)
       rescue => e
         @errors << e
