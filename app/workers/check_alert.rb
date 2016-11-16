@@ -44,6 +44,5 @@ class CheckAlert < ActiveJob::Base
         end
       end
     end
-    # if current price LOGIC COMPARE to alert.trigger_price
   end
 end
