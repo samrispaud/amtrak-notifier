@@ -25,6 +25,8 @@ module Scraper
         sleep(5)
       rescue => e
         @errors << e
+        file = File.open(@driver.save_screenshot)
+        order.update(receipt: file)
       end
     end
 
@@ -70,6 +72,8 @@ module Scraper
         order.update(receipt: file)
       rescue => e
         @errors << e
+        file = File.open(@driver.save_screenshot)
+        order.update(receipt: file)
       end
     end
 
