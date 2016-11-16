@@ -15,7 +15,7 @@ module Scraper
 
         # Configure Capybara to use Poltergeist as the driver
         Capybara.default_driver = :poltergeist
-        Capybara.save_path = "public/capybara_screenshots"
+        Capybara.save_path = "public/capybara_screenshots/"
 
         @driver = Capybara.current_session
         @driver.visit 'https://stockfuse.com/accounts/signin/?next=/'
@@ -25,7 +25,7 @@ module Scraper
         sleep(5)
       rescue => e
         @errors << e
-        file = File.open(@driver.save_screenshot)
+        file = File.open(Capybara::Screenshot.screenshot_and_save_page[:image])
         order.update(receipt: file)
       end
     end
@@ -68,21 +68,21 @@ module Scraper
         @driver.execute_script("submitOrder()")
         # wait for trade to send
         sleep(5)
-        file = File.open(@driver.save_screenshot)
+        file = File.open(Capybara::Screenshot.screenshot_and_save_page[:image])
         order.update(receipt: file)
       rescue => e
         @errors << e
-        file = File.open(@driver.save_screenshot)
+        file = File.open(Capybara::Screenshot.screenshot_and_save_page[:image])
         order.update(receipt: file)
       end
     end
 
     # def check_order_succesful(order)
     #   begin
-    #     # @driver.save_screenshot 'after_trade.png'
+    #     # Capybara::Screenshot.screenshot_and_save_page[:image] 'after_trade.png'
     #     @driver.find_element(:class, "fuse-list")
     #     @driver.find_element(:xpath, "//div[@class='main-sidebar-user']//a[.='Sign Out']").click
-    #     # @driver.save_screenshot 'done.png'
+    #     # Capybara::Screenshot.screenshot_and_save_page[:image] 'done.png'
     #     @driver.quit
     #     headless.destroy
     #   rescue => e

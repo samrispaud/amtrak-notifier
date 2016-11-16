@@ -32,6 +32,7 @@ gem "headless"
 gem "nokogiri"
 gem 'poltergeist'
 gem 'capybara'
+gem 'capybara-screenshot'
 gem 'launchy'
 
 # for users and auth
