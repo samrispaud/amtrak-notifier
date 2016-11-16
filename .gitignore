@@ -19,7 +19,6 @@
 dump.rdb
 
 # Ignore screenshots
-/public/capybara_screenshots
 /public/uploads
 
 # Ignore application configuration
