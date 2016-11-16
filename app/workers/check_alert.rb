@@ -20,6 +20,8 @@ class CheckAlert < ActiveJob::Base
         else
           alert.order.update(status: "Success")
           alert.update(status: "Success")
+          game_id = alert.order.game_id
+          Alert.where(ticker: alert.ticker, status: "active").joins(:order).where(orders: { game_id:  game_id }).update_all(status:"Inactivated due to similar alert succeeding")
           msg = "[SUCCESS] " + msg
           @client = Twilio::REST::Client.new
           @client.messages.create( from: ENV["TWILIO_NUMBER"], to: alert.user.phone_number, body: msg )
@@ -38,6 +40,8 @@ class CheckAlert < ActiveJob::Base
         else
           alert.order.update(status: "Success")
           alert.update(status: "Success")
+          game_id = alert.order.game_id
+          Alert.where(ticker: alert.ticker, status: "active").joins(:order).where(orders: { game_id:  game_id }).update_all(status:"Inactivated due to similar alert succeeding")
           msg = "[SUCCESS] " + msg
           @client = Twilio::REST::Client.new
           @client.messages.create( from: ENV["TWILIO_NUMBER"], to: alert.user.phone_number, body: msg )
