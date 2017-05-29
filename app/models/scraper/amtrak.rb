@@ -57,7 +57,7 @@ module Scraper
         html_doc = Nokogiri::HTML(@driver.html)
         prices = html_doc.xpath("//tr[@class='ffam-segment-container']//td[1]//div[1]//span[@id='_lowestFareFFBean']")
         parsed_prices = prices.map { |p| p.content.to_f }
-        cheap_prices = parsed_prices.any? { |p| p < 50 }
+        cheap_prices = parsed_prices.any? { |p| p < 200 }
         logger.debug "Amtrak Scraper found prices #{parsed_prices} for date #{date_this_month}"
         p "Amtrak Scraper found prices #{parsed_prices} for date #{date_this_month}"
         if cheap_prices
