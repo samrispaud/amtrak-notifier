@@ -66,6 +66,8 @@ module Scraper
         end
       rescue => e
         @errors << e
+        logger.debug @errors
+        p @errors
       end
     end
   end
