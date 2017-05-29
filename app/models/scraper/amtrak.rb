@@ -60,8 +60,9 @@ module Scraper
         prices = html_doc.xpath("//tr[@class='ffam-segment-container']//td[1]//div[1]//span[@id='_lowestFareFFBean']")
         parsed_prices = prices.map { |p| p.content.to_f }
         cheap_prices = parsed_prices.any? { |p| p < 100 }
+        alerts_on? = Alert.find_by(ticker: "Amtrak").try(:status)
         p "Amtrak Scraper found prices #{parsed_prices} for date #{date_this_month}"
-        if cheap_prices
+        if cheap_prices && alerts_on?
           p "Found cheap prices!"
           @client = Twilio::REST::Client.new
           @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{parsed_prices.sort[0]}) found for 05/31" )
