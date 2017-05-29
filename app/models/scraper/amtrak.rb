@@ -26,50 +26,52 @@ module Scraper
     end
 
     def check_tickets
-      begin
-        p "Checking Amtrak tickets..."
-        # Fill out DEPARTING station
-        departs = @driver.find(:id, "departs")
-        departs.send_keys "bal"
-        sleep(1)
-        # select first option in typeahead
-        departs.native.send_keys(:return)
+      alerts_on = Alert.find_by(ticker: "Amtrak").try(:status)
+      if alerts_on
+        begin
+          p "Checking Amtrak tickets..."
+          # Fill out DEPARTING station
+          departs = @driver.find(:id, "departs")
+          departs.send_keys "bal"
+          sleep(1)
+          # select first option in typeahead
+          departs.native.send_keys(:return)
 
-        # Fill out ARRIVAL station
-        departs = @driver.find(:id, "arrives")
-        departs.send_keys "nyp"
-        sleep(1)
-        # select first option in typeahead
-        departs.native.send_keys(:return)
+          # Fill out ARRIVAL station
+          departs = @driver.find(:id, "arrives")
+          departs.send_keys "nyp"
+          sleep(1)
+          # select first option in typeahead
+          departs.native.send_keys(:return)
 
-        # Fill out date
-        date_this_month = '31'
-        @driver.execute_script("document.getElementById('wdfdate1').click()")
-        @driver.execute_script("var aTags = document.getElementsByTagName('a'); var date = #{date_this_month}; for (var i = 0; i < aTags.length; i++) { if (aTags[i].textContent == date) { aTags[i].click(); break; } }")
+          # Fill out date
+          date_this_month = '31'
+          @driver.execute_script("document.getElementById('wdfdate1').click()")
+          @driver.execute_script("var aTags = document.getElementsByTagName('a'); var date = #{date_this_month}; for (var i = 0; i < aTags.length; i++) { if (aTags[i].textContent == date) { aTags[i].click(); break; } }")
 
-        # Select time, afternoon
-        @driver.select "Evening", from: "wdftime1"
+          # Select time, afternoon
+          @driver.select "Evening", from: "wdftime1"
 
-        # submit
-        @driver.execute_script("document.getElementById('findtrains').click()")
-        sleep(2)
+          # submit
+          @driver.execute_script("document.getElementById('findtrains').click()")
+          sleep(2)
 
-        # parse
-        p "Parsing HTML doc..."
-        html_doc = Nokogiri::HTML(@driver.html)
-        prices = html_doc.xpath("//tr[@class='ffam-segment-container']//td[1]//div[1]//span[@id='_lowestFareFFBean']")
-        parsed_prices = prices.map { |p| p.content.to_f }
-        cheap_prices = parsed_prices.any? { |p| p < 100 }
-        alerts_on = Alert.find_by(ticker: "Amtrak").try(:status)
-        p "Amtrak Scraper found prices #{parsed_prices} for date #{date_this_month}"
-        if cheap_prices && alerts_on
-          p "Found cheap prices!"
-          @client = Twilio::REST::Client.new
-          @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{parsed_prices.sort[0]}) found for 05/31" )
+          # parse
+          p "Parsing HTML doc..."
+          html_doc = Nokogiri::HTML(@driver.html)
+          prices = html_doc.xpath("//tr[@class='ffam-segment-container']//td[1]//div[1]//span[@id='_lowestFareFFBean']")
+          parsed_prices = prices.map { |p| p.content.to_f }
+          cheap_prices = parsed_prices.any? { |p| p < 50 }
+          p "Amtrak Scraper found prices #{parsed_prices} for date #{date_this_month}"
+          if cheap_prices
+            p "Found cheap prices!"
+            @client = Twilio::REST::Client.new
+            @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{parsed_prices.sort[0]}) found for 05/31" )
+          end
+        rescue => e
+          p "An err occured: #{e}"
+          @errors << e
         end
-      rescue => e
-        p "An err occured: #{e}"
-        @errors << e
       end
     end
   end
