@@ -1,5 +1,11 @@
-check_active_alerts:
+# check_active_alerts:
+#   cron: "* * * * *"
+#   class: "CheckActiveAlerts"
+#   queue: default
+#   active_job: true
+
+check_amtrak:
   cron: "* * * * *"
-  class: "CheckActiveAlerts"
+  class: "CheckAmtrak"
   queue: default
   active_job: true
