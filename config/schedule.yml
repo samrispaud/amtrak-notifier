@@ -1,9 +1,3 @@
-# check_active_alerts:
-#   cron: "* * * * *"
-#   class: "CheckActiveAlerts"
-#   queue: default
-#   active_job: true
-
 check_amtrak:
   cron: "*/3 * * * *"
   class: "CheckAmtrak"

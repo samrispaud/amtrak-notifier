@@ -8,8 +8,8 @@ class CheckActiveAlerts < ActiveJob::Base
   queue_as :default
 
   def perform
-    Alert.where(status: "active").find_each do |alert|
-      CheckAlert.perform_now(alert.id)
-    end
+    # Alert.where(status: "active").find_each do |alert|
+    #   CheckAlert.perform_now(alert.id)
+    # end
   end
 end
