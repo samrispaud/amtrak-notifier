@@ -4,7 +4,7 @@ module Scraper
   class Amtrak
     attr_reader :errors
 
-    def initialize
+    def initialize(day_of_month)
       begin
         @errors = []
 
@@ -19,6 +19,7 @@ module Scraper
 
         @driver = Capybara.current_session
         @driver.visit 'https://www.amtrak.com/home'
+        @day_of_month = day_of_month
         check_tickets
       rescue => e
         @errors << e
@@ -32,25 +33,25 @@ module Scraper
           p "Checking Amtrak tickets..."
           # Fill out DEPARTING station
           departs = @driver.find(:id, "departs")
-          departs.send_keys "bal"
+          departs.send_keys "nyp"
           sleep(1)
           # select first option in typeahead
           departs.native.send_keys(:return)
 
           # Fill out ARRIVAL station
           departs = @driver.find(:id, "arrives")
-          departs.send_keys "nyp"
+          departs.send_keys "bal"
           sleep(1)
           # select first option in typeahead
           departs.native.send_keys(:return)
 
           # Fill out date
-          date_this_month = '31'
+          date_this_month = @day_of_month
           @driver.execute_script("document.getElementById('wdfdate1').click()")
           @driver.execute_script("var aTags = document.getElementsByTagName('a'); var date = #{date_this_month}; for (var i = 0; i < aTags.length; i++) { if (aTags[i].textContent == date) { aTags[i].click(); break; } }")
 
           # Select time, afternoon
-          @driver.select "Evening", from: "wdftime1"
+          @driver.select "Morning", from: "wdftime1"
 
           # submit
           @driver.execute_script("document.getElementById('findtrains').click()")
@@ -66,7 +67,7 @@ module Scraper
           if cheap_prices
             p "Found cheap prices!"
             @client = Twilio::REST::Client.new
-            @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{parsed_prices.sort[0]}) found for 05/31" )
+            @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{parsed_prices.sort[0]}) found for 06/#{date_this_month}" )
           end
         rescue => e
           p "An err occured: #{e}"
