@@ -1,5 +1,5 @@
 check_amtrak:
-  cron: "*/3 * * * *"
+  cron: "*/5 * * * *"
   class: "CheckAmtrak"
   queue: default
   active_job: true
