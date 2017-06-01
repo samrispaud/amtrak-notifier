@@ -2,77 +2,95 @@ require 'capybara/poltergeist'
 
 module Scraper
   class Amtrak
-    attr_reader :errors
+    attr_reader :prices, :error
 
-    def initialize(day_of_month)
+    def initialize(departure_station, arrival_station, date)
       begin
-        @errors = []
+        @departure_station = departure_station
+        @arrival_station = arrival_station
+        @date = date
+        @day = validate_date_and_return_day_number(@date)
 
-        # Register driver
-        Capybara.register_driver :poltergeist do |app|
-          Capybara::Poltergeist::Driver.new(app, js_errors: false)
-        end
+        @driver = register_driver
 
-        # Configure Capybara to use Poltergeist as the driver
-        Capybara.default_driver = :poltergeist
-        Capybara.save_path = "public/capybara_screenshots/"
-
-        @driver = Capybara.current_session
-        @driver.visit 'https://www.amtrak.com/home'
-        @day_of_month = day_of_month
-        check_tickets
-      rescue => e
-        @errors << e
+        @prices = check_tickets
+      rescue => error
+        p "Amtrak::Scraper Error: #{error}"
+        @error = error
       end
     end
 
+    def register_driver
+      # Register driver
+      Capybara.register_driver :poltergeist do |app|
+        Capybara::Poltergeist::Driver.new(app, js_errors: false)
+      end
+
+      # Configure Capybara to use Poltergeist as the driver
+      Capybara.default_driver = :poltergeist
+      Capybara.save_path = "public/capybara_screenshots/"
+
+      Capybara.current_session
+    end
+
     def check_tickets
-      alerts_on = Alert.find_by(ticker: "Amtrak").try(:status)
-      if alerts_on
-        begin
-          p "Checking Amtrak tickets..."
-          # Fill out DEPARTING station
-          departs = @driver.find(:id, "departs")
-          departs.send_keys "nyp"
-          sleep(1)
-          # select first option in typeahead
-          departs.native.send_keys(:return)
+      begin
+        p "Checking Amtrak tickets..."
+        @driver.visit 'https://www.amtrak.com/home'
+        sleep(2)
+        # Fill out DEPARTING station
+        departs = @driver.find(:id, "departs")
+        departs.send_keys @departure_station
+        sleep(1)
+        # select first option in typeahead
+        departs.native.send_keys(:return)
 
-          # Fill out ARRIVAL station
-          departs = @driver.find(:id, "arrives")
-          departs.send_keys "bal"
-          sleep(1)
-          # select first option in typeahead
-          departs.native.send_keys(:return)
+        # Fill out ARRIVAL station
+        departs = @driver.find(:id, "arrives")
+        departs.send_keys @arrival_station
+        sleep(1)
+        # select first option in typeahead
+        departs.native.send_keys(:return)
 
-          # Fill out date
-          date_this_month = @day_of_month
-          @driver.execute_script("document.getElementById('wdfdate1').click()")
-          @driver.execute_script("var aTags = document.getElementsByTagName('a'); var date = #{date_this_month}; for (var i = 0; i < aTags.length; i++) { if (aTags[i].textContent == date) { aTags[i].click(); break; } }")
+        # Fill out date
+        @driver.execute_script("document.getElementById('wdfdate1').click()")
+        @driver.execute_script("var aTags = document.getElementsByTagName('a'); for (var i = 0; i < aTags.length; i++) { if (aTags[i].textContent == #{@day}) { aTags[i].click(); break; } }")
 
-          # Select time, afternoon
-          @driver.select "Morning", from: "wdftime1"
+        # Select time, doesnt really matter because all times are present in the DOM anyway
+        @driver.select "Morning", from: "wdftime1"
 
-          # submit
-          @driver.execute_script("document.getElementById('findtrains').click()")
-          sleep(2)
+        # submit
+        @driver.execute_script("document.getElementById('findtrains').click()")
+        sleep(2)
 
-          # parse
-          p "Parsing HTML doc..."
-          html_doc = Nokogiri::HTML(@driver.html)
-          prices = html_doc.xpath("//tr[@class='ffam-segment-container']//td[1]//div[1]//span[@id='_lowestFareFFBean']")
-          parsed_prices = prices.map { |p| p.content.to_f }
-          cheap_prices = parsed_prices.any? { |p| p < 50 }
-          p "Amtrak Scraper found prices #{parsed_prices} for date #{date_this_month}"
-          if cheap_prices
-            p "Found cheap prices!"
-            @client = Twilio::REST::Client.new
-            @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{parsed_prices.sort[0]}) found for 06/#{date_this_month}" )
-          end
-        rescue => e
-          p "An err occured: #{e}"
-          @errors << e
-        end
+        # parse
+        p "Parsing HTML doc..."
+        parse_prices(@driver.html)
+      rescue => e
+        p "[ERROR] An err occured: #{e}"
+      end
+    end
+
+    private
+
+    def parse_prices(html_string)
+      html_doc = Nokogiri::HTML(html_string)
+      train_nodes = html_doc.xpath("//div[@class='ffam-inner-wrapper']")
+      train_nodes.map do |train|
+        time = train.xpath("div[@class='ffam-time']").text()
+        {
+          price: train.xpath("span[@id='_lowestFareFFBean']").text().to_f,
+          date_time_string: @date.strftime('%A %B %d ') + time
+        }
+      end
+    end
+
+    def validate_date_and_return_day_number(date)
+      date_valid = Date.yesterday < date && date < Date.today + 1.months
+      if date_valid
+        date.day
+      else
+        throw "Invalid date"
       end
     end
   end

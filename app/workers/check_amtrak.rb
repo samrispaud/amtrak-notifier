@@ -2,6 +2,13 @@ class CheckAmtrak < ActiveJob::Base
   queue_as :default
 
   def perform
-    Scraper::Amtrak.new("3")
+    scraper = Scraper::Amtrak.new("NYP", "BAL", Date.parse("June 3"))
+    p "Prices found: #{scraper.prices.map { |p| p[:price]}}"
+    scraper.prices.select! { |p| p[:price] < 50 }
+    scraper.prices.each do |p|
+      p "Found cheap prices!"
+      @client = Twilio::REST::Client.new
+      @client.messages.create( from: '14435520159', to: '7326739564', body: "Cheap amtrak tix ($#{p[:price]}) for #{p[:date_time_string]}" )
+    end
   end
 end
