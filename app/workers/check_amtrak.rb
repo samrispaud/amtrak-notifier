@@ -2,9 +2,9 @@ class CheckAmtrak < ActiveJob::Base
   queue_as :default
 
   def perform
-    scraper = Scraper::Amtrak.new("NYP", "BAL", Date.parse("June 3"))
+    scraper = Scraper::Amtrak.new("BAL", "TRE", Date.parse("Nov 22"))
     p "Prices found: #{scraper.prices.map { |p| p[:price]}}"
-    scraper.prices.select! { |p| p[:price] < 50 }
+    scraper.prices.select! { |p| p[:price] < 90 }
     scraper.prices.each do |p|
       p "Found cheap prices!"
       @client = Twilio::REST::Client.new

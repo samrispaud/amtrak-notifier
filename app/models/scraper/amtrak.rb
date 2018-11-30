@@ -27,7 +27,7 @@ module Scraper
       end
 
       # Configure Capybara to use Poltergeist as the driver
-      Capybara.default_driver = :poltergeist
+      Capybara.default_driver = :selenium
       Capybara.save_path = "public/capybara_screenshots/"
 
       Capybara.current_session
@@ -37,34 +37,36 @@ module Scraper
       begin
         p "Checking Amtrak tickets..."
         @driver.visit 'https://www.amtrak.com/home'
-        sleep(2)
+        sleep(4)
         # Fill out DEPARTING station
-        departs = @driver.find(:id, "departs")
+        departs = @driver.find('input[data-automation-id="fStation"]')
         departs.send_keys @departure_station
         sleep(1)
         # select first option in typeahead
         departs.native.send_keys(:return)
 
         # Fill out ARRIVAL station
-        departs = @driver.find(:id, "arrives")
+        departs = @driver.find('input[data-automation-id="tStation"]')
         departs.send_keys @arrival_station
         sleep(1)
         # select first option in typeahead
         departs.native.send_keys(:return)
 
         # Fill out date
-        @driver.execute_script("document.getElementById('wdfdate1').click()")
-        @driver.execute_script("var aTags = document.getElementsByTagName('a'); for (var i = 0; i < aTags.length; i++) { if (aTags[i].textContent == #{@day}) { aTags[i].click(); break; } }")
+        @driver.execute_script("document.querySelectorAll(\"[data-julie='departdisplay_booking_oneway']\")[0].click()")
+        @driver.execute_script("document.getElementsByClassName(\"k-in-month k-active k-today currentDate\")[5].click()")
 
         # Select time, doesnt really matter because all times are present in the DOM anyway
-        @driver.select "Morning", from: "wdftime1"
-
+        @driver.execute_script("document.querySelectorAll(\"[data-julie='travelersnumber']\")[0].click()")
+        @driver.execute_script("document.querySelectorAll(\"[data-julie='passengersdone']\")[0].click()")
+        binding.pry
         # submit
-        @driver.execute_script("document.getElementById('findtrains').click()")
-        sleep(2)
+        @driver.execute_script("document.querySelectorAll(\"[data-julie='findtrains']\")[0].click()")
+        sleep(4)
 
         # parse
         p "Parsing HTML doc..."
+        p @driver.html
         parse_prices(@driver.html)
       rescue => e
         p "[ERROR] An err occured: #{e}"
